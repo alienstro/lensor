@@ -62,7 +62,7 @@ def _verify(text: str, result: ExtractionResult) -> list[VerifiedClause]:
     for item in result.clauses:
         name = canonical_clause_type(item.clause_type)
         if name is None:
-            logger.warning("Dropped unknown clause type %r", item.clause_type)
+            logger.warning("Dropped an unknown clause type (%d chars)", len(item.clause_type))
         elif name in by_type:
             logger.warning("Dropped duplicate clause type %r", item.clause_type)
         else:
@@ -78,7 +78,9 @@ def _verify(text: str, result: ExtractionResult) -> list[VerifiedClause]:
                 span = locate_quote(text, quote)
                 if span is None:
                     logger.warning(
-                        "Dropped a quote that is not in the contract: %s: %r", name, quote
+                        "Dropped a quote that is not in the contract: %s (%d chars)",
+                        name,
+                        len(quote),
                     )
                 elif span not in spans:
                     spans.append(span)

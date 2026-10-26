@@ -8,8 +8,11 @@ from lensor.extract.schema import RiskLevel
 
 
 class HasClause(Protocol):
-    clause_type: str
-    found: bool
+    @property
+    def clause_type(self) -> str: ...
+
+    @property
+    def found(self) -> bool: ...
 
 
 @dataclass(frozen=True)
