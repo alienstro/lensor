@@ -122,9 +122,9 @@ class OpenRouterClient:
         self, model: str, messages: list[dict], schema: type[T]
     ) -> tuple[T, Usage]:
         try:
-            response = await self._client.chat.completions.create(
+            response = await self._client.chat.completions.create(  # type: ignore[call-overload]
                 model=model,
-                messages=messages,  # type: ignore[arg-type]
+                messages=messages,
                 response_format={
                     "type": "json_schema",
                     "json_schema": {
@@ -163,9 +163,9 @@ class OpenRouterClient:
         calls: dict[int, dict[str, str]] = {}
         usage: Usage | None = None
         try:
-            stream = await self._client.chat.completions.create(
+            stream = await self._client.chat.completions.create(  # type: ignore[call-overload]
                 model=model,
-                messages=messages,  # type: ignore[arg-type]
+                messages=messages,
                 stream=True,
                 stream_options={"include_usage": True},
                 extra_body={"provider": CHAT_PROVIDER, "usage": {"include": True}},
