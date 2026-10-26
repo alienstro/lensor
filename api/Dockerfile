@@ -13,4 +13,6 @@ RUN uv sync --frozen --no-dev
 RUN python -c "from lensor.ingest.chunker import chunk_text; chunk_text('Warm the cache.')"
 
 EXPOSE 8000
-CMD ["sh", "-c", "alembic upgrade head && uvicorn lensor.main:app --host 0.0.0.0 --port 8000"]
+# Read the client address from X-Forwarded-For only when a proxy on a private network sent it.
+# The rate limit on /api/chat uses that address.
+CMD ["sh", "-c", "alembic upgrade head && uvicorn lensor.main:app --host 0.0.0.0 --port 8000 --proxy-headers --forwarded-allow-ips=10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,127.0.0.1"]
