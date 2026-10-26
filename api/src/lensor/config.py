@@ -7,7 +7,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    database_url: str = "postgresql+asyncpg://lensor:lensor@localhost:5432/lensor"
+    database_url: str = "postgresql+asyncpg://lensor:lensor@localhost:5433/lensor"
     openrouter_api_key: str = ""
     openrouter_base_url: str = "https://openrouter.ai/api/v1"
     llm_model_extract: str = "deepseek/deepseek-v4.1-flash"
