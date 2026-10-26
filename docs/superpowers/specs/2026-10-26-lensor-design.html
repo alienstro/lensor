@@ -1,0 +1,456 @@
+<title>Lensor Design</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap">
+<style>
+/* Layout: a contract-review dossier. Sticky clause index on the left, one reading column on the right. */
+:root {
+  --paper: #f6f7f9;
+  --sheet: #ffffff;
+  --ink: #161a22;
+  --muted: #5a6273;
+  --rule: #dde1e8;
+  --accent: #2c46b8;
+  --accent-soft: #e8ecfb;
+  --mark: #fde68a;
+  --mark-ink: #4a3a00;
+  --ok: #1f7a4d;
+  --warn: #a35a00;
+  --bad: #b3261e;
+  --display: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0f1218; --sheet: #161a22; --ink: #e7eaf0; --muted: #9aa3b5; --rule: #2a303c;
+    --accent: #8ea2ff; --accent-soft: #1d2440; --mark: #5c4a10; --mark-ink: #fde68a;
+    --ok: #6fd3a0; --warn: #f0b45c; --bad: #ff8a80; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0f1218; --sheet: #161a22; --ink: #e7eaf0; --muted: #9aa3b5; --rule: #2a303c;
+  --accent: #8ea2ff; --accent-soft: #1d2440; --mark: #5c4a10; --mark-ink: #fde68a;
+  --ok: #6fd3a0; --warn: #f0b45c; --bad: #ff8a80; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--paper); color: var(--ink); font-family: var(--body);
+  font-size: 16px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap {
+  max-width: 1120px; margin: 0 auto; padding-block: 48px 96px;
+  display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 56px;
+}
+nav.index { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 24px); align-self: start; }
+nav.index p { font: 500 11px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0 0 14px; }
+nav.index ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; border-left: 1px solid var(--rule); }
+nav.index a {
+  display: grid; grid-template-columns: 26px 1fr; padding: 4px 0 4px 12px; margin-left: -1px;
+  border-left: 2px solid transparent; color: var(--muted); text-decoration: none; font-size: 14px;
+}
+nav.index a span { font: 12px/1.9 var(--mono); }
+nav.index a:hover, nav.index a:focus-visible { color: var(--ink); border-left-color: var(--accent); outline: none; }
+main { min-width: 0; }
+header.hero { display: grid; gap: 20px; padding-bottom: 40px; border-bottom: 1px solid var(--rule); }
+.eyebrow { font: 500 12px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin: 0; }
+h1 { font: 700 clamp(40px, 6vw, 60px)/1.05 var(--display); margin: 0; letter-spacing: -.01em; text-wrap: balance; }
+.lead { font-size: 19px; max-width: 62ch; margin: 0; color: var(--ink); }
+.meta { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.meta li { font: 12px/1 var(--mono); padding: 7px 10px; border: 1px solid var(--rule); border-radius: 4px; color: var(--muted); background: var(--sheet); }
+.excerpt {
+  background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; padding: 20px 22px;
+  font: 15px/1.75 var(--display); max-width: 720px;
+}
+.excerpt .cap { font: 500 11px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.excerpt mark { background: var(--mark); color: var(--mark-ink); padding: 1px 2px; border-radius: 2px; }
+.excerpt .tag { display: inline-flex; gap: 8px; margin-top: 12px; font: 12px/1 var(--mono); flex-wrap: wrap; }
+.excerpt .tag b { font-weight: 500; background: var(--accent-soft); color: var(--accent); padding: 6px 8px; border-radius: 3px; }
+.excerpt .tag i { font-style: normal; padding: 6px 0; color: var(--muted); }
+section { padding-top: 56px; scroll-margin-top: 24px; }
+section > h2 { display: flex; align-items: baseline; gap: 14px; font: 600 28px/1.2 var(--display); margin: 0 0 16px; text-wrap: balance; }
+section > h2 .n { font: 500 13px/1 var(--mono); color: var(--accent); }
+section p { max-width: 68ch; margin: 0 0 14px; }
+h3 { font: 600 13px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
+code { font: 13.5px var(--mono); background: var(--accent-soft); color: var(--ink); padding: 1px 5px; border-radius: 3px; }
+a { color: var(--accent); }
+.tbl { overflow-x: auto; margin: 8px 0 18px; border: 1px solid var(--rule); border-radius: 6px; background: var(--sheet); }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+th, td { text-align: left; vertical-align: top; padding: 10px 14px; border-bottom: 1px solid var(--rule); }
+th { font: 500 11.5px/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); background: var(--paper); white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td:first-child { white-space: nowrap; }
+td.wrap1 { white-space: normal; }
+.cols3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.col { background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; padding: 18px; border-top: 3px solid var(--c); min-width: 0; }
+.col.g { --c: var(--ok); } .col.n { --c: var(--muted); } .col.a { --c: var(--bad); }
+.col ul { margin: 0; padding-left: 18px; display: grid; gap: 8px; font-size: 14.5px; }
+ol.steps { list-style: none; counter-reset: s; margin: 0; padding: 0; display: grid; gap: 0; max-width: 760px; }
+ol.steps li { counter-increment: s; display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 4px; padding: 12px 0; border-top: 1px solid var(--rule); }
+ol.steps li::before { content: counter(s, decimal-leading-zero); font: 500 13px/1.8 var(--mono); color: var(--accent); }
+ol.steps b { font-weight: 600; }
+.diagram { overflow-x: auto; background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; padding: 20px; }
+.diagram svg { display: block; min-width: 720px; width: 100%; height: auto; }
+.diagram .box { fill: var(--paper); stroke: var(--rule); }
+.diagram .box.k { fill: var(--accent-soft); stroke: var(--accent); }
+.diagram text { fill: var(--ink); font: 14px var(--body); }
+.diagram text.s { fill: var(--muted); font: 11.5px var(--mono); }
+.diagram .ln { stroke: var(--muted); stroke-width: 1.4; fill: none; }
+.diagram .ln.d { stroke-dasharray: 5 4; }
+.diagram .hd { fill: var(--muted); }
+.callout { border-left: 3px solid var(--accent); background: var(--accent-soft); padding: 12px 16px; border-radius: 0 6px 6px 0; max-width: 68ch; font-size: 15px; }
+ul.plain { margin: 0 0 14px; padding-left: 18px; display: grid; gap: 6px; max-width: 70ch; }
+.qs { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; max-width: 70ch; }
+.qs li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 8px; background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; padding: 10px 14px; }
+.qs li::before { content: "?"; font: 600 13px/1.7 var(--mono); color: var(--warn); }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.two > div { min-width: 0; }
+footer { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--rule); font-size: 13.5px; color: var(--muted); }
+@media (max-width: 900px) {
+  .wrap { grid-template-columns: minmax(0, 1fr); gap: 0; padding-block: 28px 64px; }
+  nav.index { display: none; }
+  .cols3, .two { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+</style>
+
+<div class="wrap">
+  <nav class="index" aria-label="Sections">
+    <p>Clause index</p>
+    <ol>
+      <li><a href="#purpose"><span>01</span>Purpose</a></li>
+      <li><a href="#goals"><span>02</span>Goals</a></li>
+      <li><a href="#data"><span>03</span>Data</a></li>
+      <li><a href="#flow"><span>04</span>User flow</a></li>
+      <li><a href="#architecture"><span>05</span>Architecture</a></li>
+      <li><a href="#stack"><span>06</span>Stack</a></li>
+      <li><a href="#model"><span>07</span>Data model and API</a></li>
+      <li><a href="#agent"><span>08</span>Agent tools</a></li>
+      <li><a href="#eval"><span>09</span>Evaluation</a></li>
+      <li><a href="#milestones"><span>10</span>Milestones</a></li>
+      <li><a href="#calls"><span>11</span>Calls and questions</a></li>
+      <li><a href="#sources"><span>12</span>Sources</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header class="hero">
+      <p class="eyebrow">Portfolio project · Design</p>
+      <h1>Lensor</h1>
+      <p class="lead">A web app that reviews commercial contracts with LLMs through OpenRouter, RAG, and an agent. It uses the public CUAD dataset, so it measures its accuracy against real lawyer labels.</p>
+      <ul class="meta">
+        <li>As of 2026-10-26</li>
+        <li>React · FastAPI · OpenRouter</li>
+        <li>pgvector · Qdrant · LlamaIndex</li>
+        <li>Docker · Dokploy</li>
+      </ul>
+      <figure class="excerpt" aria-label="Example of an extracted clause">
+        <div class="cap"><span>Illustrative excerpt · Supply Agreement §11.2</span><span>Viewer preview</span></div>
+        … except for a breach of Section 8 (Confidentiality), <mark>in no event shall either party's aggregate liability under this Agreement exceed the total fees paid by Customer in the twelve (12) months before the claim.</mark> Neither party shall be liable for indirect or consequential damages …
+        <div class="tag"><b>Cap on Liability</b><i>found · risk: low · quote verified in source text</i></div>
+      </figure>
+    </header>
+
+    <section id="purpose">
+      <h2><span class="n">01</span>Purpose</h2>
+      <p>Lensor shows a hiring manager that you can ship a full-stack AI app from an ambiguous brief. The story user is a consultant or a legal operations analyst. This person must review a set of supplier contracts quickly and find the risky clauses.</p>
+      <p>The app replaces this manual work: read each contract, find each important clause, copy it into a spreadsheet, and compare it with the other contracts.</p>
+      <div class="tbl"><table>
+        <thead><tr><th>Job description line</th><th>Lensor feature</th></tr></thead>
+        <tbody>
+          <tr><td class="wrap1">Full-stack web apps</td><td>React frontend, FastAPI backend, OpenRouter and vector store integrations</td></tr>
+          <tr><td class="wrap1">Intelligent dashboards</td><td>Risk dashboard by contract and by clause type</td></tr>
+          <tr><td class="wrap1">Agentic workflows</td><td>Chat agent that calls tools to search, filter, and compare clauses</td></tr>
+          <tr><td class="wrap1">Document processing pipelines</td><td>Upload, parse, chunk, embed, and store pipeline</td></tr>
+          <tr><td class="wrap1">Conversational interfaces</td><td>Chat panel with cited answers</td></tr>
+          <tr><td class="wrap1">Streaming, structured outputs, tool use</td><td>Streamed answers, JSON clause extraction, agent tools</td></tr>
+          <tr><td class="wrap1">Polished, demo-ready UI</td><td>Contract viewer with clause highlights</td></tr>
+          <tr><td class="wrap1">RAG, vector search, data pipelines</td><td>Cited answers from contract chunks in pgvector</td></tr>
+          <tr><td class="wrap1">Reusable component libraries</td><td><code>VectorStore</code> interface with pgvector and Qdrant adapters</td></tr>
+          <tr><td class="wrap1">REST APIs and database concepts</td><td>FastAPI REST endpoints and a Postgres schema</td></tr>
+          <tr><td class="wrap1">Vector databases or RAG frameworks</td><td>pgvector, Qdrant, and LlamaIndex</td></tr>
+          <tr><td class="wrap1">Cloud or Docker</td><td>Docker Compose, then one cloud deploy</td></tr>
+          <tr><td class="wrap1">Ship something tangible</td><td>Live demo URL, README with the evaluation score</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="goals">
+      <h2><span class="n">02</span>Goals, non-goals, and anti-goals</h2>
+      <div class="cols3">
+        <div class="col g"><h3>Goals</h3><ul>
+          <li>A user uploads a contract and sees the extracted clauses in less than 60 seconds.</li>
+          <li>Each chat answer cites the contract and the clause text that it uses.</li>
+          <li>An evaluation script reports precision and recall per clause type against the CUAD labels.</li>
+          <li>One command (<code>docker compose up</code>) starts the full app.</li>
+          <li>A public demo URL runs with pre-loaded CUAD contracts.</li>
+        </ul></div>
+        <div class="col n"><h3>Non-goals (v1)</h3><ul>
+          <li>Legal advice. The UI shows a "not legal advice" notice.</li>
+          <li>User accounts or multi-tenant data. The demo has one shared workspace.</li>
+          <li>OCR of scanned PDFs.</li>
+          <li>All 41 CUAD clause types. Version 1 uses 10.</li>
+          <li>A Pinecone adapter. The interface allows it later.</li>
+        </ul></div>
+        <div class="col a"><h3>Anti-goals</h3><ul>
+          <li>An answer cites a clause that is not in the contract.</li>
+          <li>The README has no measured accuracy score.</li>
+          <li>The API key is in the repository, or the demo has no cost limit.</li>
+          <li>The infrastructure is larger than the app needs, for example Kubernetes.</li>
+        </ul></div>
+      </div>
+    </section>
+
+    <section id="data">
+      <h2><span class="n">03</span>Data</h2>
+      <p>The app uses <a href="https://www.atticusprojectai.org/cuad">CUAD v1</a> from The Atticus Project: 510 commercial contracts with more than 13,000 lawyer labels across 41 clause types. The license is CC BY 4.0, so the README must credit The Atticus Project.</p>
+      <ul class="plain">
+        <li><b>Download:</b> <code>CUAD_v1.zip</code> (105.9 MB) from <a href="https://zenodo.org/records/4595826">Zenodo record 4595826</a>. The <a href="https://github.com/TheAtticusProject/cuad">GitHub repository</a> also has <code>data.zip</code> and <code>category_descriptions.csv</code>.</li>
+        <li><b>Check at ingest time:</b> the exact file layout inside the zip. The pages that I opened do not list it.</li>
+        <li><b>Demo set:</b> 50 contracts, pre-loaded in the public demo.</li>
+        <li><b>Evaluation set:</b> 50 different contracts that the demo and the prompts never see.</li>
+      </ul>
+      <p>Version 1 extracts these 10 clause types. The names match the CUAD category names exactly, so the evaluation can compare them with the labels.</p>
+      <div class="tbl"><table>
+        <thead><tr><th>CUAD clause type</th><th>Why a reviewer cares</th></tr></thead>
+        <tbody>
+          <tr><td>Expiration Date</td><td>When the contract ends</td></tr>
+          <tr><td>Renewal Term</td><td>Automatic renewal can lock in cost</td></tr>
+          <tr><td>Notice Period to Terminate Renewal</td><td>The last date to stop a renewal</td></tr>
+          <tr><td>Governing Law</td><td>Which jurisdiction applies</td></tr>
+          <tr><td>Termination for Convenience</td><td>Who can exit without cause</td></tr>
+          <tr><td>Change of Control</td><td>What happens after an acquisition</td></tr>
+          <tr><td>Anti-Assignment</td><td>Whether a party can transfer the contract</td></tr>
+          <tr><td>Non-Compete</td><td>Limits on the business</td></tr>
+          <tr><td>Cap on Liability</td><td>The maximum loss</td></tr>
+          <tr><td>Uncapped Liability</td><td>Exposure with no limit</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="flow">
+      <h2><span class="n">04</span>User flow</h2>
+      <ol class="steps">
+        <li><span>The user opens the <b>dashboard</b>. It shows the 50 demo contracts and a risk score for each one.</span></li>
+        <li><span>The user <b>uploads</b> a new contract (PDF or TXT). The UI shows the pipeline status: parse, chunk, embed, extract.</span></li>
+        <li><span>The app opens the <b>contract viewer</b>. It highlights each extracted clause, with a colour per clause type.</span></li>
+        <li><span>The side panel lists the 10 clause types, with the clause text, a summary, and a risk flag. It shows "Not found" when the contract has no such clause.</span></li>
+        <li><span>The user asks a question in the <b>chat panel</b>, for example "Which contracts have uncapped liability and renew automatically?"</span></li>
+        <li><span>The agent calls its tools, and the UI shows each tool call as a small step. The answer streams in, with a citation link for each claim.</span></li>
+        <li><span>The user clicks a citation. The viewer opens that contract at the cited clause.</span></li>
+        <li><span>The user opens the <b>Evaluation</b> page. It shows precision and recall per clause type from the last run.</span></li>
+      </ol>
+    </section>
+
+    <section id="architecture">
+      <h2><span class="n">05</span>Architecture</h2>
+      <p>The browser talks only to the FastAPI service. The service owns all calls to OpenRouter and to the stores. An env variable selects the vector store.</p>
+      <div class="diagram">
+        <svg viewBox="0 0 900 360" role="img" aria-label="Architecture: React web app calls FastAPI over REST and SSE. FastAPI calls OpenRouter chat, OpenRouter embeddings, Postgres with pgvector, and optionally Qdrant. The ingestion pipeline and the evaluation script also use the API's modules.">
+          <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="hd" d="M0,0 L10,5 L0,10 z"/></marker></defs>
+          <rect class="box" x="20" y="140" width="170" height="80" rx="6"/>
+          <text x="105" y="176" text-anchor="middle">React web app</text>
+          <text class="s" x="105" y="198" text-anchor="middle">Vite · shadcn/ui</text>
+
+          <rect class="box k" x="300" y="120" width="210" height="120" rx="6"/>
+          <text x="405" y="160" text-anchor="middle">FastAPI service</text>
+          <text class="s" x="405" y="184" text-anchor="middle">REST + SSE</text>
+          <text class="s" x="405" y="204" text-anchor="middle">agent loop · quote check</text>
+          <text class="s" x="405" y="224" text-anchor="middle">VectorStore interface</text>
+
+          <rect class="box" x="640" y="20" width="230" height="60" rx="6"/>
+          <text x="755" y="47" text-anchor="middle">OpenRouter · chat</text>
+          <text class="s" x="755" y="67" text-anchor="middle">extraction · agent · summaries</text>
+
+          <rect class="box" x="640" y="110" width="230" height="60" rx="6"/>
+          <text x="755" y="137" text-anchor="middle">OpenRouter · embeddings</text>
+          <text class="s" x="755" y="157" text-anchor="middle">text-embedding-3-small</text>
+
+          <rect class="box" x="640" y="200" width="230" height="60" rx="6"/>
+          <text x="755" y="227" text-anchor="middle">Postgres + pgvector</text>
+          <text class="s" x="755" y="247" text-anchor="middle">tables · default vectors</text>
+
+          <rect class="box" x="640" y="290" width="230" height="60" rx="6"/>
+          <text x="755" y="317" text-anchor="middle">Qdrant</text>
+          <text class="s" x="755" y="337" text-anchor="middle">VECTOR_STORE=qdrant</text>
+
+          <rect class="box" x="300" y="290" width="210" height="60" rx="6"/>
+          <text x="405" y="317" text-anchor="middle">Ingest + eval CLIs</text>
+          <text class="s" x="405" y="337" text-anchor="middle">LlamaIndex parse · chunk</text>
+
+          <path class="ln" d="M190 180 H296" marker-end="url(#ah)"/>
+          <text class="s" x="243" y="170" text-anchor="middle">HTTPS</text>
+          <path class="ln" d="M510 150 C 575 150, 575 50, 636 50" marker-end="url(#ah)"/>
+          <path class="ln" d="M510 170 C 575 170, 575 140, 636 140" marker-end="url(#ah)"/>
+          <path class="ln" d="M510 200 C 575 200, 575 230, 636 230" marker-end="url(#ah)"/>
+          <path class="ln d" d="M510 220 C 575 220, 575 320, 636 320" marker-end="url(#ah)"/>
+          <path class="ln" d="M405 290 V244" marker-end="url(#ah)"/>
+          <text class="s" x="415" y="272">same modules</text>
+        </svg>
+      </div>
+    </section>
+
+    <section id="stack">
+      <h2><span class="n">06</span>Stack</h2>
+      <p>All choices below are the designer's calls. The builder can change one for a clear reason, and must write the reason in the README.</p>
+      <div class="tbl"><table>
+        <thead><tr><th>Layer</th><th>Choice</th><th>Reason</th></tr></thead>
+        <tbody>
+          <tr><td>Frontend</td><td>React, TypeScript, Vite, Tailwind CSS, shadcn/ui, TanStack Query</td><td>The job lists React first. shadcn/ui gives a polished UI fast.</td></tr>
+          <tr><td>Backend</td><td>Python 3.12, FastAPI, Pydantic, SQLAlchemy, Alembic</td><td>Python is the usual language for RAG work. Pydantic models also define the JSON schemas for structured outputs.</td></tr>
+          <tr><td>LLM gateway</td><td>OpenRouter (<code>https://openrouter.ai/api/v1</code>), called with the OpenAI Python SDK and a custom <code>base_url</code></td><td>One key reaches models from many vendors. The OpenAI-compatible format keeps the code portable.</td></tr>
+          <tr><td>LLM models</td><td>Env variables <code>LLM_MODEL_AGENT</code>, <code>LLM_MODEL_EXTRACT</code>, <code>LLM_MODEL_SUMMARY</code>, with exact model ids (see the table below)</td><td>Exact ids, not <code>~…-latest</code> aliases, keep the evaluation results repeatable.</td></tr>
+          <tr><td>Routing</td><td><code>provider.require_parameters: true</code>, <code>provider.data_collection: "deny"</code></td><td>Requests go only to providers that support tools and JSON schemas, and that do not keep the data.</td></tr>
+          <tr><td>Streaming</td><td>Server-Sent Events</td><td>SSE is simpler than WebSockets for one-way token streams.</td></tr>
+          <tr><td>Embeddings</td><td>OpenRouter <code>/embeddings</code> with <code>openai/text-embedding-3-small</code></td><td>The same key and client as the chat calls. A hosted model keeps the 8 GB laptop free.</td></tr>
+          <tr><td>RAG framework</td><td>LlamaIndex for parse and chunk only</td><td>Write the prompts, the retrieval query, and the agent loop by hand, so that you can explain each one in an interview.</td></tr>
+          <tr><td>Vector store</td><td>pgvector (main), Qdrant (second adapter)</td><td>One store runs at a time. Two adapters show the skill without a code smell.</td></tr>
+          <tr><td>Database</td><td>PostgreSQL 16 with pgvector</td><td>One database for relational data and vectors.</td></tr>
+          <tr><td>Tests</td><td>pytest, Vitest</td><td>Standard tools for each language.</td></tr>
+          <tr><td>Local run</td><td>Docker Compose: <code>web</code>, <code>api</code>, <code>postgres</code>, <code>qdrant</code> (profile)</td><td>One command starts the app.</td></tr>
+          <tr><td>Deploy</td><td>Dokploy on the owner's server: the same Compose file, with <code>pgvector/pgvector:pg16</code> and Qdrant as containers</td><td>One Compose file for the laptop and the server. Dokploy manages the domain and the HTTPS certificate.</td></tr>
+          <tr><td>CI</td><td>GitHub Actions: lint, typecheck, tests, Docker build</td><td>A green badge in the README shows good practice.</td></tr>
+        </tbody>
+      </table></div>
+      <h3>Default models and cost</h3>
+      <p>All models below support <code>tools</code> and <code>structured_outputs</code> on OpenRouter. The prices are OpenRouter list prices on 2026-10-26, in US dollars per 1 million tokens.</p>
+      <div class="tbl"><table>
+        <thead><tr><th>Job</th><th>Model id</th><th>Input</th><th>Output</th><th>Reason</th></tr></thead>
+        <tbody>
+          <tr><td>Clause extraction</td><td><code>deepseek/deepseek-v4.1-flash</code></td><td>$0.02</td><td>$1.00</td><td>A contract is long input and short output, so the input price matters most. The context is 1M tokens.</td></tr>
+          <tr><td>Chat agent</td><td><code>openai/gpt-5-mini</code></td><td>$0.25</td><td>$2.00</td><td>The demo shows the agent most, so it gets a model with reliable tool calls.</td></tr>
+          <tr><td>Summaries</td><td><code>openai/gpt-5-nano</code></td><td>$0.05</td><td>$0.40</td><td>A short, simple task.</td></tr>
+          <tr><td>Embeddings</td><td><code>openai/text-embedding-3-small</code></td><td>$0.02</td><td>None</td><td>1,536 dimensions. This is below the 2,000-dimension limit of a pgvector HNSW index on the <code>vector</code> type.</td></tr>
+          <tr><td>Comparison only</td><td><code>anthropic/claude-haiku-5.5</code></td><td>$0.10</td><td>$0.50</td><td>The job names Anthropic. The evaluation compares it with the defaults.</td></tr>
+          <tr><td>Comparison only</td><td><code>google/gemini-3.1-flash-lite</code></td><td>$0.25</td><td>$1.50</td><td>A third vendor for the comparison.</td></tr>
+        </tbody>
+      </table></div>
+      <p class="callout">Estimate: one ingest and extraction of 100 contracts costs less than $1. One evaluation run costs about $1 or less per model. Set a $10 monthly credit limit on the OpenRouter key for the public demo.</p>
+    </section>
+
+    <section id="model">
+      <h2><span class="n">07</span>Data model and API</h2>
+      <p>Postgres holds the contracts, the extractions, and the evaluation results. The vector store holds the chunk embeddings, with <code>contract_id</code> and character offsets as metadata.</p>
+      <div class="tbl"><table>
+        <thead><tr><th>Table</th><th>Main columns</th></tr></thead>
+        <tbody>
+          <tr><td><code>contracts</code></td><td><code>id</code>, <code>title</code>, <code>source</code>, <code>text</code>, <code>status</code>, <code>risk_score</code>, <code>created_at</code></td></tr>
+          <tr><td><code>chunks</code></td><td><code>id</code>, <code>contract_id</code>, <code>start_char</code>, <code>end_char</code>, <code>text</code></td></tr>
+          <tr><td><code>clause_extractions</code></td><td><code>id</code>, <code>contract_id</code>, <code>clause_type</code>, <code>found</code>, <code>quote</code>, <code>start_char</code>, <code>end_char</code>, <code>summary</code>, <code>risk_level</code>, <code>model</code></td></tr>
+          <tr><td><code>eval_runs</code></td><td><code>id</code>, <code>started_at</code>, <code>model</code>, <code>prompt_version</code>, <code>contract_count</code>, <code>cost_usd</code></td></tr>
+          <tr><td><code>eval_results</code></td><td><code>run_id</code>, <code>clause_type</code>, <code>precision</code>, <code>recall</code>, <code>f1</code></td></tr>
+        </tbody>
+      </table></div>
+      <p class="callout">The backend checks each <code>quote</code> against the contract text before it saves the row. If the quote is not in the text, the backend drops it and logs the event. This check stops invented citations.</p>
+      <div class="tbl"><table>
+        <thead><tr><th>Method</th><th>Path</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td>POST</td><td><code>/api/contracts</code></td><td>Upload a contract and start the pipeline</td></tr>
+          <tr><td>GET</td><td><code>/api/contracts</code></td><td>List contracts with risk scores</td></tr>
+          <tr><td>GET</td><td><code>/api/contracts/{id}</code></td><td>Get one contract with its extractions</td></tr>
+          <tr><td>GET</td><td><code>/api/contracts/{id}/status</code></td><td>Get the pipeline status (SSE)</td></tr>
+          <tr><td>POST</td><td><code>/api/chat</code></td><td>Send a message, get a streamed answer with tool steps (SSE)</td></tr>
+          <tr><td>GET</td><td><code>/api/dashboard</code></td><td>Get counts by clause type and risk level</td></tr>
+          <tr><td>GET</td><td><code>/api/eval/runs/latest</code></td><td>Get the latest evaluation results</td></tr>
+          <tr><td>GET</td><td><code>/api/health</code></td><td>Health check for Dokploy</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="agent">
+      <h2><span class="n">08</span>Agent tools</h2>
+      <p>The chat agent is a hand-written tool-calling loop on the OpenRouter chat completions API, in the OpenAI <code>tools</code> format. It stops after 8 tool calls per question, so one question cannot run up a large bill. All tools are read-only.</p>
+      <div class="tbl"><table>
+        <thead><tr><th>Tool</th><th>Input</th><th>Output</th><th>Source</th></tr></thead>
+        <tbody>
+          <tr><td><code>search_clauses</code></td><td><code>query</code>, optional <code>clause_type</code>, <code>contract_ids</code>, <code>top_k</code></td><td>Matching chunks with contract title and offsets</td><td>Vector store</td></tr>
+          <tr><td><code>list_contracts_by_clause</code></td><td><code>clause_type</code>, <code>found</code>, optional <code>risk_level</code></td><td>Contract ids and titles</td><td>Postgres</td></tr>
+          <tr><td><code>get_contract_summary</code></td><td><code>contract_id</code></td><td>The 10 extracted clauses and the risk score</td><td>Postgres</td></tr>
+          <tr><td><code>compare_clauses</code></td><td><code>clause_type</code>, <code>contract_ids</code> (2 to 5)</td><td>The quotes side by side</td><td>Postgres</td></tr>
+        </tbody>
+      </table></div>
+      <p>The system prompt tells the agent to cite each claim with a <code>contract_id</code> and character offsets. The backend turns each citation into a link to the viewer. A citation that does not match stored text shows as "unverified" in the UI.</p>
+    </section>
+
+    <section id="eval">
+      <h2><span class="n">09</span>Evaluation</h2>
+      <p>The evaluation gives the README its headline number: precision, recall, and F1 per clause type on 50 held-out CUAD contracts.</p>
+      <ul class="plain">
+        <li><b>Command:</b> <code>python -m lensor.eval --contracts 50</code> writes the results to <code>eval_runs</code> and <code>eval_results</code>.</li>
+        <li><b>Match rule:</b> a predicted quote matches a label when the two character spans overlap with a Jaccard score of 0.5 or more. "Not found" is correct when the contract has no label of that type.</li>
+        <li><b>Two variants:</b> full contract text in the prompt, and retrieved chunks only. The README compares accuracy and cost for both.</li>
+        <li><b>Model comparison:</b> the script takes <code>--model</code>, so one run per model shows accuracy and cost side by side. OpenRouter makes this a one-line change.</li>
+        <li><b>Retrieval check:</b> recall@5 per clause type, for pgvector and for Qdrant.</li>
+        <li><b>Cost:</b> the script records the token count and the cost in US dollars for each run.</li>
+        <li><b>Version tag:</b> each run stores the <code>prompt_version</code>, so a prompt change shows as a new row.</li>
+      </ul>
+      <p class="callout">The evaluation runs by hand, not in CI, because each run calls the paid API.</p>
+    </section>
+
+    <section id="milestones">
+      <h2><span class="n">10</span>Milestones</h2>
+      <p>Each milestone ends with something that you can show. Do them in this order, because each one uses the one before it.</p>
+      <ol class="steps">
+        <li><span><b>Skeleton.</b> Docker Compose with <code>web</code>, <code>api</code>, and <code>postgres</code>. The React page calls <code>/api/health</code>. CI runs lint and tests.</span></li>
+        <li><span><b>Ingestion.</b> A script loads the CUAD contracts. The pipeline parses, chunks, embeds, and stores them in pgvector.</span></li>
+        <li><span><b>Extraction.</b> The LLM extracts the 10 clause types as JSON. The quote check runs. The viewer shows the highlights.</span></li>
+        <li><span><b>Evaluation.</b> The script runs on 50 contracts. Improve the prompt until the score stops going up, then freeze <code>prompt_version</code> 1.</span></li>
+        <li><span><b>Chat agent.</b> The tool-use loop, SSE streaming, tool steps in the UI, and citation links.</span></li>
+        <li><span><b>Dashboard.</b> The risk scores, the counts by clause type, and the Evaluation page.</span></li>
+        <li><span><b>Qdrant adapter.</b> The second <code>VectorStore</code> adapter and the recall@5 comparison.</span></li>
+        <li><span><b>Deploy.</b> Dokploy on your server, a daily Postgres backup, a $10 credit limit on the OpenRouter key, and a rate limit on <code>/api/chat</code>.</span></li>
+        <li><span><b>Polish.</b> README with the architecture diagram, the evaluation table, a 2-minute demo video, and the CUAD credit.</span></li>
+      </ol>
+    </section>
+
+    <section id="calls">
+      <h2><span class="n">11</span>Calls and open questions</h2>
+      <div class="two">
+        <div>
+          <h3>Calls the designer made</h3>
+          <ul class="plain">
+            <li>10 clause types for version 1, not all 41.</li>
+            <li>50 demo contracts and 50 different evaluation contracts.</li>
+            <li>Jaccard 0.5 as the span match rule.</li>
+            <li>OpenRouter for chat and embeddings, with <code>require_parameters</code> and <code>data_collection: "deny"</code>.</li>
+            <li>The default models and the $10 monthly credit limit.</li>
+            <li>A limit of 8 tool calls per chat question.</li>
+            <li>SSE for streaming, not WebSockets.</li>
+          </ul>
+          <h3>Left to the builder</h3>
+          <ul class="plain">
+            <li>The chunk size and the overlap. Pick them with the recall@5 check.</li>
+            <li>The risk score formula. Keep it simple and show it in the UI.</li>
+            <li>The folder layout and the component names.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Owner decisions</h3>
+          <ul class="plain">
+            <li>Python (FastAPI) for the backend.</li>
+            <li>OpenRouter for all LLM and embedding calls. No direct Claude API.</li>
+            <li>Deploy with Dokploy on the owner's own server.</li>
+            <li>The GitHub repository is public, so no secret goes in it. Use <code>.env</code> files and Dokploy env settings.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="sources">
+      <h2><span class="n">12</span>Sources</h2>
+      <ul class="plain">
+        <li><a href="https://www.atticusprojectai.org/cuad">CUAD, The Atticus Project</a>: dataset size, clause count, and license.</li>
+        <li><a href="https://zenodo.org/records/4595826">Zenodo record 4595826</a>: <code>CUAD_v1.zip</code>, 105.9 MB, CC BY 4.0.</li>
+        <li><a href="https://github.com/TheAtticusProject/cuad">TheAtticusProject/cuad on GitHub</a> and <a href="https://raw.githubusercontent.com/TheAtticusProject/cuad/main/category_descriptions.csv">category_descriptions.csv</a>: the 41 category names.</li>
+        <li><a href="https://openrouter.ai/docs/api-reference/overview">OpenRouter API overview</a>: base URL, streaming, tool calling, structured outputs.</li>
+        <li><a href="https://openrouter.ai/docs/features/provider-routing">OpenRouter provider routing</a>: <code>require_parameters</code> and <code>data_collection</code>.</li>
+        <li><a href="https://openrouter.ai/docs/api-reference/embeddings">OpenRouter embeddings</a>: the <code>/embeddings</code> endpoint and model names.</li>
+        <li><a href="https://openrouter.ai/api/v1/models">OpenRouter models API</a>: prices and supported parameters, read on 2026-10-26.</li>
+      </ul>
+      <footer>The clause excerpt at the top is an illustrative example, not a quote from a CUAD contract. Lensor is a portfolio project and does not give legal advice.</footer>
+    </section>
+  </main>
+</div>
