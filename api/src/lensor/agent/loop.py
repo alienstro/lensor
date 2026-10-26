@@ -5,7 +5,7 @@ from collections.abc import AsyncIterator
 from dataclasses import asdict
 from typing import Any
 
-from lensor.agent.citations import verify_citations
+from lensor.agent.citations import collect_spans, verify_citations
 from lensor.agent.tools import TOOLS, ToolContext, run_tool
 from lensor.clauses import CLAUSE_TYPES
 from lensor.llm.client import LLMClient, LLMError, TextDelta, ToolCall, parse_arguments
@@ -36,6 +36,8 @@ async def run_agent(
     conversation: list[dict[str, Any]] = [{"role": "system", "content": SYSTEM_PROMPT}, *messages]
     used = 0
     answer: list[str] = []
+    # Spans that the tools returned. A citation must point into one of them.
+    seen: dict[int, list[tuple[int, int]]] = {}
     try:
         while True:
             limit_reached = used >= max_tool_calls
@@ -73,6 +75,7 @@ async def run_agent(
                 args = parse_arguments(call.arguments)
                 yield {"type": "tool_call", "id": call.id, "name": call.name, "args": args}
                 result = await run_tool(call.name, args, ctx)
+                collect_spans(result, seen)
                 if not args and call.arguments.strip() not in ("", "{}"):
                     result = {"error": "The arguments are not valid JSON."}
                 yield {
@@ -93,6 +96,6 @@ async def run_agent(
         return
 
     async with ctx.session_factory() as session:
-        citations = await verify_citations("".join(answer), session)
+        citations = await verify_citations("".join(answer), session, seen=seen)
     yield {"type": "citations", "items": [asdict(c) for c in citations]}
     yield {"type": "done"}

@@ -153,3 +153,16 @@ async def test_verify_citations_bad_refs(session_factory) -> None:
     assert citations[0].title == "Risky"
     assert citations[0].quote == TEXT[:49]
     assert citations[1].quote is None
+
+
+@pytest.mark.db
+async def test_verify_citations_needs_a_span_from_a_tool(session_factory) -> None:
+    risky_id, _ = await seed(session_factory)
+    answer = f"Renews [c:{risky_id}:0-49]. Made up [c:{risky_id}:55-70]."
+    seen = {risky_id: [(0, 49)]}
+
+    async with session_factory() as session:
+        citations = await verify_citations(answer, session, seen=seen)
+
+    assert [c.verified for c in citations] == [True, False]
+    assert citations[1].quote is None

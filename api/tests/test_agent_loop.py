@@ -5,7 +5,7 @@ import pytest
 from lensor.agent.loop import run_agent
 from lensor.agent.tools import ToolContext
 from lensor.llm.client import LLMError, TextDelta, ToolCall, Usage
-from lensor.models import Contract
+from lensor.models import ClauseExtraction, Contract
 from lensor.routes import chat as chat_route
 from lensor.vectorstore.pgvector_store import PgVectorStore
 from tests.fakes import FakeLLMClient
@@ -23,11 +23,24 @@ async def test_agent_runs_tool_then_answers(session_factory) -> None:
     async with session_factory() as session:
         contract = Contract(title="Deal", source="cuad", text="x" * 50, status="ready")
         session.add(contract)
+        await session.flush()
+        session.add(
+            ClauseExtraction(
+                contract_id=contract.id,
+                clause_type="Renewal Term",
+                found=True,
+                quote="x" * 10,
+                start_char=0,
+                end_char=10,
+                summary="s",
+                risk_level="low",
+                model="m",
+                prompt_version=1,
+            )
+        )
         await session.commit()
         cid = contract.id
-    call = ToolCall(
-        "t1", "list_contracts_by_clause", '{"clause_type": "Renewal Term", "found": true}'
-    )
+    call = ToolCall("t1", "get_contract_summary", f'{{"contract_id": {cid}}}')
     llm = FakeLLMClient(
         event_scripts=[
             [call, Usage(1, 1, None)],
@@ -45,12 +58,12 @@ async def test_agent_runs_tool_then_answers(session_factory) -> None:
         "citations",
         "done",
     ]
-    assert events[0]["name"] == "list_contracts_by_clause"
-    assert events[0]["args"] == {"clause_type": "Renewal Term", "found": True}
+    assert events[0]["name"] == "get_contract_summary"
+    assert events[0]["args"] == {"contract_id": cid}
     assert events[1] == {
         "type": "tool_result",
         "id": "t1",
-        "name": "list_contracts_by_clause",
+        "name": "get_contract_summary",
         "ok": True,
     }
     assert events[4]["items"][0]["verified"] is True
@@ -121,3 +134,18 @@ async def test_chat_rate_limit(api, monkeypatch) -> None:
 
     chat_route.limiter.reset()
     assert codes == [200, 200, 429]
+
+
+@pytest.mark.db
+async def test_agent_marks_offsets_not_from_tools_unverified(session_factory) -> None:
+    async with session_factory() as session:
+        contract = Contract(title="Deal", source="cuad", text="x" * 50, status="ready")
+        session.add(contract)
+        await session.commit()
+        cid = contract.id
+    llm = FakeLLMClient(event_scripts=[[TextDelta(f"It renews [c:{cid}:0-10].")]])
+
+    events = await collect(llm, session_factory)
+
+    citations = next(e for e in events if e["type"] == "citations")["items"]
+    assert citations[0]["verified"] is False
