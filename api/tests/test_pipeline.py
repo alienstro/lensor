@@ -130,12 +130,42 @@ async def test_pipeline_empty_upload_sets_failed(session_factory) -> None:
         assert "no text" in (contract.status_detail or "")
 
 
-def test_display_title() -> None:
-    assert (
-        display_title("LIMEENERGYCO_09_09_1999-EX-10-DISTRIBUTOR AGREEMENT")
-        == "Distributor Agreement, Limeenergyco (1999)"
-    )
-    assert display_title("Plain Title") == "Plain Title"
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        (
+            "LIMEENERGYCO_09_09_1999-EX-10-DISTRIBUTOR AGREEMENT",
+            "Distributor Agreement, Limeenergyco (1999)",
+        ),
+        (
+            "DUOSTECHNOLOGIESGROUP,INC_04_21_2009-EX-10.1-STRATEGIC ALLIANCE AGREEMENT",
+            "Strategic Alliance Agreement, Duostechnologiesgroup (2009)",
+        ),
+        (
+            "BLACKSTONEGSOLONG-SHORTCREDITINCOMEFUND_05_11_2020-EX-99.(K)(1)-SERVICE AGREEMENT",
+            "Service Agreement, Blackstonegsolong-Shortcreditincomefund (2020)",
+        ),
+        (
+            "NEONSYSTEMSINC_03_01_1999-EX-10.5-DISTRIBUTOR AGREEMENT_Amendment",
+            "Distributor Agreement Amendment, Neonsystems (1999)",
+        ),
+        (
+            "HealthcentralCom_19991108_S-1A_EX-10.27_6623292_EX-10.27_Co-Branding Agreement",
+            "Co-Branding Agreement, Healthcentral Com (1999)",
+        ),
+        (
+            "SoupmanInc_20150814_8-K_EX-10.1_9230148_EX-10.1_Franchise Agreement2",
+            "Franchise Agreement, Soupman (2015)",
+        ),
+        (
+            "UpjohnInc_20200121_10-12G_EX-2.6_11948692_EX-2.6_Manufacturing Agreement_ Supply Agreement",
+            "Manufacturing Agreement, Supply Agreement, Upjohn (2020)",
+        ),
+        ("Plain Title", "Plain Title"),
+    ],
+)
+def test_display_title(raw: str, expected: str) -> None:
+    assert display_title(raw) == expected
 
 
 async def test_pipeline_status_order(session_factory, monkeypatch) -> None:

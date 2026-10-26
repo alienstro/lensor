@@ -21,17 +21,37 @@ from lensor.vectorstore.factory import get_vector_store
 
 DEFAULT_JSON = Path("data/CUADv1.json")
 
-_TITLE_RE = re.compile(r"^(?P<company>[^_]+)_\d{1,2}_\d{1,2}_(?P<year>\d{4})-EX-[^-]+-(?P<doc>.+)$")
+# Two CUAD title formats:
+#   A: COMPANY_MM_DD_YYYY-EX-<exhibit>-DOC TYPE[_suffix]
+#   B: CompanyName_YYYYMMDD_<form>_EX-<exhibit>_<id>_EX-<exhibit>_Doc Type
+_FORMAT_A = re.compile(r"^(?P<company>.+?)_\d{2}_\d{2}_(?P<year>\d{4})-EX-[^-]+-(?P<doc>.+)$")
+_FORMAT_B = re.compile(r"^(?P<company>[^_]+)_(?P<year>\d{4})\d{4}_.*_EX-[^_]+_(?P<doc>[^_].*)$")
+_COMPANY_SUFFIX = re.compile(r",?\s*(INC|LLC|LTD|CORP|PLC|LP)\.?$", re.IGNORECASE)
+_CAMEL = re.compile(r"(?<=[a-z])(?=[A-Z])")
+
+
+def _clean_company(raw: str, camel: bool) -> str:
+    name = _COMPANY_SUFFIX.sub("", raw.strip())
+    if camel:
+        name = _CAMEL.sub(" ", name)
+    return name.title() if name.isupper() else name
 
 
 def display_title(cuad_title: str) -> str:
     """Make a CUAD file title readable, for example "Distributor Agreement, Acme (1999)"."""
-    match = _TITLE_RE.match(cuad_title.strip())
-    if match is None:
-        return cuad_title.strip()
-    doc = match["doc"].strip().title()
-    company = match["company"].strip().title()
-    return f"{doc}, {company} ({match['year']})"
+    title = cuad_title.strip()
+    for pattern, camel in ((_FORMAT_A, False), (_FORMAT_B, True)):
+        match = pattern.match(title)
+        if match is None:
+            continue
+        doc = re.sub(r"\d+$", "", match["doc"].strip())
+        if pattern is _FORMAT_A:
+            doc = " ".join(part.strip().title() for part in doc.split("_") if part.strip())
+        else:
+            doc = ", ".join(part.strip() for part in doc.split("_") if part.strip())
+        company = _clean_company(match["company"], camel)
+        return f"{doc}, {company} ({match['year']})"
+    return title
 
 
 async def main(contract_set: str, json_path: Path, limit: int | None) -> None:
