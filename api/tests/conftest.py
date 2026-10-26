@@ -46,3 +46,24 @@ async def session_factory(engine: AsyncEngine) -> AsyncIterator[async_sessionmak
     names = ", ".join(t.name for t in Base.metadata.sorted_tables)
     async with engine.begin() as conn:
         await conn.execute(text(f"TRUNCATE {names} RESTART IDENTITY CASCADE"))
+
+
+@pytest.fixture
+async def api(session_factory):
+    """An HTTP client for the app, with the test database and a fake LLM."""
+    import httpx
+
+    from lensor import deps
+    from lensor.main import app
+    from lensor.vectorstore.pgvector_store import PgVectorStore
+    from tests.fakes import FakeLLMClient
+
+    fake = FakeLLMClient()
+    app.dependency_overrides[deps.get_session_factory] = lambda: session_factory
+    app.dependency_overrides[deps.get_llm] = lambda: fake
+    app.dependency_overrides[deps.get_store] = lambda: PgVectorStore(session_factory)
+    transport = httpx.ASGITransport(app=app)
+    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+        client.fake_llm = fake  # type: ignore[attr-defined]
+        yield client
+    app.dependency_overrides.clear()
