@@ -199,7 +199,7 @@ export function StatCard({
   action?: ReactNode
 }) {
   return (
-    <div className="min-w-0 rounded-lg bg-black p-6 text-white">
+    <section aria-label={title} className="min-w-0 rounded-lg bg-black p-6 text-white">
       <p className="m-0 mb-1 text-[13px] text-[#bdbdbd]">{title}</p>
       <dl className="m-0">
         {rows.map((row, i) => (
@@ -213,7 +213,7 @@ export function StatCard({
         ))}
       </dl>
       {action ? <div className="mt-6">{action}</div> : null}
-    </div>
+    </section>
   )
 }
 
