@@ -22,6 +22,8 @@ MAX_UPLOAD_BYTES = 10 * 1024 * 1024
 ALLOWED_SUFFIXES = {".pdf", ".txt"}
 STATUS_POLL_SECONDS = 1.0
 FINAL_STATUSES = {"ready", "failed"}
+# Rows with source "eval" are temporary copies that the evaluation CLI makes.
+VISIBLE_SOURCES = ("cuad", "upload")
 
 
 class _FoundClause:
@@ -110,9 +112,9 @@ async def list_contracts(
     async with session_factory() as session:
         contracts = (
             await session.scalars(
-                select(Contract).order_by(
-                    Contract.risk_score.desc().nulls_last(), Contract.created_at.desc()
-                )
+                select(Contract)
+                .where(Contract.source.in_(VISIBLE_SOURCES))
+                .order_by(Contract.risk_score.desc().nulls_last(), Contract.created_at.desc())
             )
         ).all()
         found = await _found_types(session, [c.id for c in contracts])
