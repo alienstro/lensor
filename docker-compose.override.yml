@@ -1,0 +1,15 @@
+# Local development only. Compose merges this file with docker-compose.yml by default.
+# The ports bind to 127.0.0.1, so other machines on the network cannot reach them.
+services:
+  postgres:
+    ports:
+      - "127.0.0.1:5433:5432"
+  api:
+    ports:
+      - "127.0.0.1:8000:8000"
+  web:
+    ports:
+      - "127.0.0.1:8080:80"
+  qdrant:
+    ports:
+      - "127.0.0.1:6333:6333"

@@ -1,12 +1,13 @@
+# Base file for the deploy. It publishes no host port: the proxy (Dokploy) routes to `web`.
+# For local work, docker-compose.override.yml adds the host ports. Compose loads it by default.
 services:
   postgres:
     image: pgvector/pgvector:pg16
+    restart: unless-stopped
     environment:
       POSTGRES_USER: lensor
-      POSTGRES_PASSWORD: lensor
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-lensor}
       POSTGRES_DB: lensor
-    ports:
-      - "127.0.0.1:5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -17,13 +18,12 @@ services:
 
   api:
     build: ./api
+    restart: unless-stopped
     env_file:
       - path: .env
         required: false
     environment:
-      DATABASE_URL: postgresql+asyncpg://lensor:lensor@postgres:5432/lensor
-    ports:
-      - "8000:8000"
+      DATABASE_URL: postgresql+asyncpg://lensor:${POSTGRES_PASSWORD:-lensor}@postgres:5432/lensor
     volumes:
       - ./data:/app/data:ro
     depends_on:
@@ -37,17 +37,15 @@ services:
 
   web:
     build: ./web
-    ports:
-      - "8080:80"
+    restart: unless-stopped
     depends_on:
       api:
         condition: service_healthy
 
   qdrant:
     image: qdrant/qdrant:v1.20.0
+    restart: unless-stopped
     profiles: ["qdrant"]
-    ports:
-      - "127.0.0.1:6333:6333"
     volumes:
       - qdrant:/qdrant/storage
 
