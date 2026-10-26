@@ -1,0 +1,42 @@
+{
+  "version": "aok_v1.0",
+  "data": [
+    {
+      "title": "ACME-SUPPLY AGREEMENT",
+      "paragraphs": [
+        {
+          "context": "SUPPLY AGREEMENT. This Agreement renews for one year. This Agreement is governed by the laws of Delaware. Neither party may assign this Agreement.",
+          "qas": [
+            {"id": "ACME-SUPPLY AGREEMENT__Renewal Term", "question": "q", "is_impossible": false,
+             "answers": [{"text": "This Agreement renews for one year.", "answer_start": 18}]},
+            {"id": "ACME-SUPPLY AGREEMENT__Governing Law", "question": "q", "is_impossible": false,
+             "answers": [{"text": "governed by the laws of Delaware", "answer_start": 72}]},
+            {"id": "ACME-SUPPLY AGREEMENT__Anti-Assignment", "question": "q", "is_impossible": false,
+             "answers": [{"text": "Neither party may assign this Agreement.", "answer_start": 106}]},
+            {"id": "ACME-SUPPLY AGREEMENT__Document Name", "question": "q", "is_impossible": false,
+             "answers": [{"text": "SUPPLY AGREEMENT", "answer_start": 0}]},
+            {"id": "ACME-SUPPLY AGREEMENT__Cap On Liability", "question": "q", "is_impossible": true,
+             "answers": []}
+          ]
+        }
+      ]
+    },
+    {
+      "title": "BETA-LICENSE AGREEMENT",
+      "paragraphs": [
+        {
+          "context": "LICENSE. Liability is capped at fees paid. Liability for fraud is not capped. Liability is capped at fees paid.",
+          "qas": [
+            {"id": "BETA-LICENSE AGREEMENT__Cap On Liability", "question": "q", "is_impossible": false,
+             "answers": [
+               {"text": "Liability is capped at fees paid.", "answer_start": 9},
+               {"text": "Liability is capped at fees paid.", "answer_start": 78}
+             ]},
+            {"id": "BETA-LICENSE AGREEMENT__Uncapped Liability", "question": "q", "is_impossible": false,
+             "answers": [{"text": "Liability for fraud is not capped.", "answer_start": 43}]}
+          ]
+        }
+      ]
+    }
+  ]
+}
