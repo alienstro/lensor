@@ -70,11 +70,11 @@ def _verify(text: str, result: ExtractionResult) -> list[VerifiedClause]:
 
     clauses = []
     for name in CLAUSE_TYPES:
-        item = by_type.get(name)
+        chosen = by_type.get(name)
         spans: list[tuple[int, int]] = []
         quotes: list[str] = []
-        if item is not None and item.found:
-            for quote in item.quotes:
+        if chosen is not None and chosen.found:
+            for quote in chosen.quotes:
                 span = locate_quote(text, quote)
                 if span is None:
                     logger.warning(
@@ -83,8 +83,10 @@ def _verify(text: str, result: ExtractionResult) -> list[VerifiedClause]:
                 elif span not in spans:
                     spans.append(span)
                     quotes.append(text[span[0] : span[1]])
-        if spans and item is not None:
-            clauses.append(VerifiedClause(name, True, spans, quotes, item.summary, item.risk_level))
+        if spans and chosen is not None:
+            clauses.append(
+                VerifiedClause(name, True, spans, quotes, chosen.summary, chosen.risk_level)
+            )
         else:
             clauses.append(VerifiedClause(name, False, [], [], "", None))
     return clauses
