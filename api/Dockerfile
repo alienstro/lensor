@@ -9,6 +9,8 @@ RUN uv sync --frozen --no-dev --no-install-project
 
 COPY . .
 RUN uv sync --frozen --no-dev
+# Download the tokenizer files at build time, not on the first upload.
+RUN python -c "from lensor.ingest.chunker import chunk_text; chunk_text('Warm the cache.')"
 
 EXPOSE 8000
 CMD ["sh", "-c", "alembic upgrade head && uvicorn lensor.main:app --host 0.0.0.0 --port 8000"]
