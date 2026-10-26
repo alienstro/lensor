@@ -7,7 +7,15 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 EMBED_DIM = 1536
 
 # Pipeline status values, in order. "failed" can follow any of them.
-CONTRACT_STATUSES = ("queued", "parsing", "embedding", "extracting", "ready", "failed")
+CONTRACT_STATUSES = (
+    "queued",
+    "parsing",
+    "chunking",
+    "embedding",
+    "extracting",
+    "ready",
+    "failed",
+)
 
 
 class Base(DeclarativeBase):

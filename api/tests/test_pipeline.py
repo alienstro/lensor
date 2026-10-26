@@ -136,3 +136,24 @@ def test_display_title() -> None:
         == "Distributor Agreement, Limeenergyco (1999)"
     )
     assert display_title("Plain Title") == "Plain Title"
+
+
+async def test_pipeline_status_order(session_factory, monkeypatch) -> None:
+    from lensor.ingest import pipeline
+
+    seen: list[str] = []
+    original = pipeline._set_status
+
+    async def record(factory, contract_id, status, detail=None):
+        seen.append(status)
+        await original(factory, contract_id, status, detail)
+
+    monkeypatch.setattr(pipeline, "_set_status", record)
+    contract_id = await add_contract(session_factory)
+    llm = FakeLLMClient(json_results=[EXTRACTION, {"overview": "o"}])
+
+    await ingest_contract(
+        contract_id, session_factory, llm, PgVectorStore(session_factory), Settings()
+    )
+
+    assert seen == ["parsing", "chunking", "embedding", "extracting"]

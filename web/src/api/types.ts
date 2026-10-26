@@ -1,5 +1,5 @@
 export type RiskLevel = 'low' | 'medium' | 'high'
-export type ContractStatus = 'queued' | 'parsing' | 'embedding' | 'extracting' | 'ready' | 'failed'
+export type ContractStatus = 'queued' | 'parsing' | 'chunking' | 'embedding' | 'extracting' | 'ready' | 'failed'
 
 export type RiskReason = { clause_type: string; points: number; text: string }
 export type RiskRule = { clause_type: string; when_found: boolean; points: number; text: string }

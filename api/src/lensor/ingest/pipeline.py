@@ -70,6 +70,10 @@ async def _run(
         text = contract.text
         if not text.strip():
             raise ValueError("The contract has no text.")
+        await session.commit()
+
+    await _set_status(session_factory, contract_id, "chunking")
+    async with session_factory() as session:
         # Remove the rows of an earlier run, so that a second run does not add duplicates.
         await store.delete_contract(contract_id)
         await session.execute(delete(Chunk).where(Chunk.contract_id == contract_id))
