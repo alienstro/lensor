@@ -22,7 +22,7 @@ def chunk_text(text: str, chunk_size: int = 512, overlap: int = 64) -> list[Chun
     cursor = 0
     for node in nodes:
         content = node.get_content()
-        start = node.start_char_idx
+        start: int | None = getattr(node, "start_char_idx", None)
         # The splitter sets the offsets with a text search. Check them, and search again if
         # they do not match the text.
         if start is None or text[start : start + len(content)] != content:
