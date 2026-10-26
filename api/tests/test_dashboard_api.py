@@ -65,6 +65,13 @@ async def test_dashboard_counts(api, session_factory) -> None:
     assert by_clause["Uncapped Liability"]["found"] == 1
     assert by_clause["Non-Compete"]["found"] == 0
     assert [c["id"] for c in body["top_risk"]] == ids[:3]
+    assert body["risk_rules"][0] == {
+        "clause_type": "Uncapped Liability",
+        "when_found": True,
+        "points": 30,
+        "text": "No limit on what you could owe for some claims",
+    }
+    assert sum(rule["points"] for rule in body["risk_rules"]) == 100
 
 
 async def test_list_hides_eval_contracts(api, session_factory) -> None:

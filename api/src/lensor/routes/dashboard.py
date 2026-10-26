@@ -1,3 +1,4 @@
+from dataclasses import asdict
 from typing import Any
 
 from fastapi import APIRouter
@@ -5,7 +6,7 @@ from sqlalchemy import select
 
 from lensor.clauses import CLAUSE_TYPES
 from lensor.deps import SessionFactoryDep
-from lensor.extract.risk import risk_level_for
+from lensor.extract.risk import RISK_RULES, risk_level_for
 from lensor.models import ClauseExtraction, Contract
 
 router = APIRouter()
@@ -67,4 +68,5 @@ async def dashboard(session_factory: SessionFactoryDep) -> dict[str, Any]:
         "top_risk": [
             {"id": c.id, "title": c.title, "risk_score": c.risk_score} for c in contracts[:TOP_RISK]
         ],
+        "risk_rules": [asdict(rule) for rule in RISK_RULES],
     }
