@@ -37,27 +37,34 @@ flowchart LR
 
 The test uses 50 CUAD contracts that the demo and the prompts never see. A predicted quote matches a lawyer label when the two character spans have a Jaccard score of 0.5 or more.
 
-> **Pending:** the evaluation has not run yet. Run the commands below with an OpenRouter key, then put the results in these tables.
-
-```bash
-docker compose run --rm api python -m lensor.eval --contracts 50 --mode full
-docker compose run --rm api python -m lensor.eval --contracts 50 --mode retrieval --retrieval-check
-docker compose run --rm api python -m lensor.eval --contracts 50 --model anthropic/claude-haiku-5.5
-docker compose run --rm api python -m lensor.eval --contracts 50 --model google/gemini-3.1-flash-lite
-```
+Measured on 2026-10-27 with prompt version 1:
 
 | Model | Mode | Macro precision | Macro recall | Macro F1 | Cost (USD) |
 | --- | --- | --- | --- | --- | --- |
-| `deepseek/deepseek-v4.1-flash` | full | pending | pending | pending | pending |
-| `deepseek/deepseek-v4.1-flash` | retrieval | pending | pending | pending | pending |
-| `anthropic/claude-haiku-5.5` | full | pending | pending | pending | pending |
-| `google/gemini-3.1-flash-lite` | full | pending | pending | pending | pending |
+| `deepseek/deepseek-v4.1-flash` | full | 0.70 | 0.84 | 0.73 | 0.29 |
+| `deepseek/deepseek-v4.1-flash` | retrieval | 0.61 | 0.67 | 0.62 | 0.25 |
+
+- In full mode, the model reads the whole contract. In retrieval mode, it reads only the 5 best chunks for each clause type, and the F1 falls by 0.11.
+- The weak types have a low precision: Uncapped Liability (F1 0.37), Notice Period to Terminate Renewal (0.48) and Non-Compete (0.52). The model marks too much text as these types.
+- The strong types are Governing Law (F1 0.99), Anti-Assignment (0.96) and Expiration Date (0.88).
 
 **Retrieval check (recall@5)**
 
 | Clause type | pgvector | Qdrant |
 | --- | --- | --- |
-| All 10 types (mean) | pending | pending |
+| All 10 types (mean) | 0.86 | not run yet |
+
+Change of Control has the lowest recall@5 (0.50). For the other 9 types, the 5 best chunks hold a lawyer label in 78% to 100% of the contracts.
+
+The runs for the other models and the Qdrant check have not run yet. To run them, use these commands:
+
+```bash
+docker compose run --rm api python -m lensor.eval --contracts 50 --model anthropic/claude-haiku-5.5
+docker compose run --rm api python -m lensor.eval --contracts 50 --model google/gemini-3.1-flash-lite
+# Qdrant: set VECTOR_STORE=qdrant, then start Qdrant before the check.
+docker compose --profile qdrant up -d
+docker compose run --rm api python -m lensor.eval --contracts 50 --mode retrieval --retrieval-check
+```
 
 ## Risk score
 
