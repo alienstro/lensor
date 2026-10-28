@@ -1,0 +1,117 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource/schibsted-grotesk/400.css";
+@import "@fontsource/schibsted-grotesk/500.css";
+@import "@fontsource/schibsted-grotesk/600.css";
+@import "@fontsource/schibsted-grotesk/700.css";
+@import "@fontsource/libre-caslon-text/400.css";
+@import "@fontsource/libre-caslon-text/400-italic.css";
+@import "@fontsource/libre-caslon-text/700.css";
+
+/* Lensor tokens. See docs/superpowers/specs/2026-10-26-lensor-ui.md section 2. */
+:root {
+  --bg: #f2f2f2;
+  --surface: #ffffff;
+  --ink: #201d1d;
+  --muted-ink: #5a5a5a;
+  --line: #d9d9d9;
+  --blue: #0004f6;
+  --black: #000000;
+  --night: #060415;
+  --risk: #d12c20;
+  --risk-on-dark: #ff5a4e;
+  --fam-term: #9bff60;
+  --fam-exit: #c9d3ff;
+  --fam-money: #ff9ed2;
+  --fam-law: #ffc58f;
+
+  /* shadcn/ui variables, mapped to the Lensor tokens. */
+  --background: var(--bg);
+  --foreground: var(--ink);
+  --card: var(--surface);
+  --card-foreground: var(--ink);
+  --popover: var(--surface);
+  --popover-foreground: var(--ink);
+  --primary: var(--blue);
+  --primary-foreground: #ffffff;
+  --secondary: var(--black);
+  --secondary-foreground: #ffffff;
+  --muted: #e6e6e6;
+  --muted-foreground: var(--muted-ink);
+  --accent: #e6e6e6;
+  --accent-foreground: var(--ink);
+  --destructive: var(--risk);
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--blue);
+  --radius: 0.5rem;
+}
+
+@theme inline {
+  --font-sans: "Schibsted Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Libre Caslon Text", ui-serif, Georgia, serif;
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted-ink: var(--muted-ink);
+  --color-line: var(--line);
+  --color-blue: var(--blue);
+  --color-black: var(--black);
+  --color-night: var(--night);
+  --color-risk: var(--risk);
+  --color-risk-on-dark: var(--risk-on-dark);
+  --color-fam-term: var(--fam-term);
+  --color-fam-exit: var(--fam-exit);
+  --color-fam-money: var(--fam-money);
+  --color-fam-law: var(--fam-law);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+    margin: 0;
+  }
+  :focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

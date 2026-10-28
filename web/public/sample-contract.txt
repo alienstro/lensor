@@ -1,0 +1,40 @@
+SAMPLE SUPPLY AGREEMENT
+
+This Supply Agreement (the "Agreement") is made on 1 March 2026 between Northwind Components Ltd. (the "Supplier") and Harbor Retail Inc. (the "Buyer"). This is a fictional contract for the Lensor demo.
+
+1. SUPPLY
+1.1 The Supplier shall supply the products listed in Schedule A to the Buyer at the prices in Schedule B.
+1.2 The Buyer shall place each order in writing. The Supplier shall confirm each order within five (5) business days.
+
+2. TERM AND RENEWAL
+2.1 This Agreement starts on the date above and ends on 28 February 2028 (the "Initial Term").
+2.2 After the Initial Term, this Agreement renews automatically for successive periods of one (1) year each, unless a party gives written notice of non-renewal.
+2.3 A party that does not want a renewal must give the other party written notice at least ninety (90) days before the end of the then-current term.
+
+3. TERMINATION
+3.1 The Supplier may terminate this Agreement for convenience at any time by giving the Buyer sixty (60) days written notice.
+3.2 Either party may terminate this Agreement at once by written notice if the other party commits a material breach and does not cure it within thirty (30) days after notice.
+
+4. CHANGE OF CONTROL AND ASSIGNMENT
+4.1 If the Buyer undergoes a change of control, including a merger or a sale of all or substantially all of its assets, the Supplier may terminate this Agreement by written notice within sixty (60) days after the change of control.
+4.2 The Buyer shall not assign or transfer this Agreement, in whole or in part, without the prior written consent of the Supplier.
+
+5. EXCLUSIVITY AND NON-COMPETITION
+5.1 During the term of this Agreement and for twelve (12) months after it ends, the Buyer shall not purchase products that compete with the products from any other supplier in North America.
+
+6. LIABILITY
+6.1 Except as stated in Section 6.2, the total liability of each party under this Agreement shall not exceed the fees paid by the Buyer in the twelve (12) months before the claim.
+6.2 The limit in Section 6.1 does not apply to the Buyer's obligations under Section 7 (Confidentiality) or to the Buyer's indemnity obligations, and the Buyer's liability for those obligations is unlimited.
+
+7. CONFIDENTIALITY
+7.1 Each party shall keep the other party's confidential information secret and use it only for this Agreement.
+
+8. GOVERNING LAW
+8.1 This Agreement is governed by and shall be construed in accordance with the laws of the State of Delaware, without regard to its conflict of laws rules.
+
+9. GENERAL
+9.1 This Agreement is the entire agreement between the parties about its subject.
+9.2 A change to this Agreement is valid only if it is in writing and both parties sign it.
+
+Signed for Northwind Components Ltd.: ____________________
+Signed for Harbor Retail Inc.: ____________________
