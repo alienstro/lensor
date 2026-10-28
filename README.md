@@ -6,7 +6,7 @@ Lensor reviews commercial contracts with LLMs, RAG, and an agent, and it measure
 
 [![CI](https://github.com/alienstro/lensor/actions/workflows/ci.yml/badge.svg)](https://github.com/alienstro/lensor/actions/workflows/ci.yml)
 
-- **Live demo:** _not deployed yet_ (see [docs/deploy.md](docs/deploy.md))
+- **Live demo:** [lensor.alienstro.xyz](https://lensor.alienstro.xyz) (deploy steps in [docs/deploy.md](docs/deploy.md))
 - **Demo video (2 minutes):** _not recorded yet_
 
 ## What it does

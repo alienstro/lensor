@@ -49,6 +49,21 @@ Keep the other keys at their values in `.env.example`.
 
 The `web` container serves the app and sends `/api` to the `api` container.
 
+In **Advanced**, turn on **Isolated deployment**. The stack then gets its own network, and the
+name `api` cannot match a container of a different project.
+
+### With a Cloudflare tunnel
+
+The live demo uses a Cloudflare tunnel, not an open HTTPS port. Cloudflare adds HTTPS, so:
+
+1. In Dokploy, add the domain with HTTPS off and the certificate set to `none`.
+2. In Cloudflare One, open the tunnel and add a public hostname for the domain. Set the service to
+   `http://dokploy-traefik:80`.
+3. Make sure that Cloudflare made a proxied `CNAME` record to `<tunnel id>.cfargotunnel.com`.
+
+> **Caution:** Traefik replaces `X-Forwarded-For`, so the API sees the proxy address for each
+> visitor. The chat limit of 20 questions for each minute then applies to all visitors together.
+
 ## 5. Deploy and load the demo contracts
 
 1. Select **Deploy**. Wait until the `api` container is healthy.
@@ -64,6 +79,14 @@ The `web` container serves the app and sends `/api` to the `api` container.
    ```
 
    Expected: 50 lines that start with `ready`. The run costs less than $1.
+
+   If the demo set is already loaded on your laptop, copy the database instead. This costs $0:
+
+   ```bash
+   docker compose exec -T postgres pg_dump -U lensor -d lensor -Fc --no-owner > lensor.dump
+   # On the server, copy the file into the postgres container of the stack, then:
+   pg_restore -U lensor -d lensor --clean --if-exists --no-owner --single-transaction lensor.dump
+   ```
 
 ## 6. Back up the database every day
 
