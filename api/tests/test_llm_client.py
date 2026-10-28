@@ -27,48 +27,66 @@ class Recorder:
         return self.handler(request)
 
 
-def make_client(recorder: Recorder) -> OpenRouterClient:
+def make_client(recorder: Recorder, **settings: object) -> OpenRouterClient:
     http = httpx.AsyncClient(transport=httpx.MockTransport(recorder))
     return OpenRouterClient(
-        Settings(openrouter_api_key="test-key"), max_retries=0, http_client=http
+        Settings(openrouter_api_key="test-key", **settings),  # type: ignore[arg-type]
+        max_retries=0,
+        http_client=http,
+    )
+
+
+def json_reply(request: httpx.Request) -> httpx.Response:
+    return httpx.Response(
+        200,
+        json={
+            "id": "r1",
+            "object": "chat.completion",
+            "created": 0,
+            "model": "m",
+            "choices": [
+                {
+                    "index": 0,
+                    "finish_reason": "stop",
+                    "message": {"role": "assistant", "content": '{"value": "ok"}'},
+                }
+            ],
+            "usage": {
+                "prompt_tokens": 10,
+                "completion_tokens": 2,
+                "total_tokens": 12,
+                "cost": 0.0001,
+            },
+        },
     )
 
 
 async def test_complete_json_sends_provider_prefs() -> None:
-    route = Recorder(
-        lambda request: httpx.Response(
-            200,
-            json={
-                "id": "r1",
-                "object": "chat.completion",
-                "created": 0,
-                "model": "m",
-                "choices": [
-                    {
-                        "index": 0,
-                        "finish_reason": "stop",
-                        "message": {"role": "assistant", "content": '{"value": "ok"}'},
-                    }
-                ],
-                "usage": {
-                    "prompt_tokens": 10,
-                    "completion_tokens": 2,
-                    "total_tokens": 12,
-                    "cost": 0.0001,
-                },
-            },
-        )
-    )
+    route = Recorder(json_reply)
     result, usage = await make_client(route).complete_json(
         "m", [{"role": "user", "content": "hi"}], Answer
     )
     assert str(route.requests[-1].url) == f"{BASE}/chat/completions"
     body = json.loads(route.requests[-1].content)
-    assert body["provider"] == {"require_parameters": True, "data_collection": "deny"}
+    assert body["provider"] == {
+        "require_parameters": True,
+        "data_collection": "deny",
+        "sort": "price",
+    }
+    assert "reasoning" not in body
     assert body["response_format"]["type"] == "json_schema"
     assert body["response_format"]["json_schema"]["schema"]["additionalProperties"] is False
     assert result == Answer(value="ok")
     assert (usage.prompt_tokens, usage.completion_tokens, usage.cost_usd) == (10, 2, 0.0001)
+
+
+async def test_complete_json_turns_reasoning_off_when_disabled() -> None:
+    route = Recorder(json_reply)
+    await make_client(route, llm_extract_reasoning=False).complete_json(
+        "m", [{"role": "user", "content": "hi"}], Answer
+    )
+    body = json.loads(route.requests[-1].content)
+    assert body["reasoning"] == {"enabled": False}
 
 
 async def test_embed_batches_and_order() -> None:

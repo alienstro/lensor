@@ -37,33 +37,48 @@ flowchart LR
 
 The test uses 50 CUAD contracts that the demo and the prompts never see. A predicted quote matches a lawyer label when the two character spans have a Jaccard score of 0.5 or more.
 
-Measured on 2026-10-27 with prompt version 1:
+All runs use prompt version 1. The cost column shows the LLM calls of the run and does not include the embeddings.
+
+**Reasoning on** (the model default, `LLM_EXTRACT_REASONING=true`), measured on 2026-10-27:
 
 | Model | Mode | Macro precision | Macro recall | Macro F1 | Cost (USD) |
 | --- | --- | --- | --- | --- | --- |
 | `deepseek/deepseek-v4.1-flash` | full | 0.70 | 0.84 | 0.73 | 0.29 |
-| `deepseek/deepseek-v4.1-flash` | retrieval | 0.61 | 0.67 | 0.62 | 0.25 |
+| `deepseek/deepseek-v4.1-flash` | retrieval (pgvector) | 0.61 | 0.67 | 0.62 | 0.25 |
 
-- In full mode, the model reads the whole contract. In retrieval mode, it reads only the 5 best chunks for each clause type, and the F1 falls by 0.11.
-- The weak types have a low precision: Uncapped Liability (F1 0.37), Notice Period to Terminate Renewal (0.48) and Non-Compete (0.52). The model marks too much text as these types.
-- The strong types are Governing Law (F1 0.99), Anti-Assignment (0.96) and Expiration Date (0.88).
+**Reasoning off** (`LLM_EXTRACT_REASONING=false`), measured on 2026-10-28:
+
+| Model | Mode | Macro precision | Macro recall | Macro F1 | Cost (USD) |
+| --- | --- | --- | --- | --- | --- |
+| `deepseek/deepseek-v4.1-flash` | full | 0.68 | 0.69 | 0.68 | 0.09 |
+| `anthropic/claude-haiku-5.5` | full | 0.66 | 0.70 | 0.66 | 0.18 |
+| `google/gemini-3.1-flash-lite` | full | 0.60 | 0.63 | 0.61 | 0.21 |
+| `deepseek/deepseek-v4.1-flash` | retrieval (Qdrant) | 0.61 | 0.64 | 0.61 | 0.03 |
+
+- With reasoning off, DeepSeek costs 3 times less, but its recall falls from 0.84 to 0.69. For contract review, a missed clause is the worse error, so the default keeps reasoning on.
+- The runs with reasoning off also use the cheapest provider. These providers can run a quantized copy of the model, so the drop can come from either change.
+- In full mode, the model reads the whole contract. In retrieval mode, it reads only the 5 best chunks for each clause type, and the F1 falls by 0.07 to 0.11.
+- DeepSeek has the best F1 at the lowest cost. Haiku is better on Change of Control (F1 0.78 against 0.50) and Non-Compete (0.60 against 0.35), but much worse on Notice Period to Terminate Renewal (0.21 against 0.71).
+- Each model wrote some quotes that are not in the contract text, and the backend dropped them: DeepSeek 20, Gemini 17 and Haiku 15.
+- Uncapped Liability and Non-Compete are weak for each model (F1 0.18 to 0.60). The models mark too much text as these types.
+- The strong types for each model are Governing Law (F1 0.88 to 0.99) and Anti-Assignment (0.75 to 0.96).
 
 **Retrieval check (recall@5)**
 
 | Clause type | pgvector | Qdrant |
 | --- | --- | --- |
-| All 10 types (mean) | 0.86 | not run yet |
+| All 10 types (mean) | 0.86 | 0.87 |
 
-Change of Control has the lowest recall@5 (0.50). For the other 9 types, the 5 best chunks hold a lawyer label in 78% to 100% of the contracts.
+The two stores give almost the same recall@5, because they search the same embeddings. Change of Control has the lowest recall@5 (0.50 in both stores). For the other 9 types, the 5 best chunks hold a lawyer label in 78% to 100% of the contracts.
 
-The runs for the other models and the Qdrant check have not run yet. To run them, use these commands:
+To run the evaluations again, use these commands:
 
 ```bash
 docker compose run --rm api python -m lensor.eval --contracts 50 --model anthropic/claude-haiku-5.5
-docker compose run --rm api python -m lensor.eval --contracts 50 --model google/gemini-3.1-flash-lite
-# Qdrant: set VECTOR_STORE=qdrant, then start Qdrant before the check.
-docker compose --profile qdrant up -d
-docker compose run --rm api python -m lensor.eval --contracts 50 --mode retrieval --retrieval-check
+docker compose run --rm -e LLM_EXTRACT_REASONING=false api python -m lensor.eval --contracts 50
+# Qdrant: start Qdrant, then set VECTOR_STORE=qdrant for the check.
+docker compose --profile qdrant up -d qdrant
+docker compose run --rm -e VECTOR_STORE=qdrant api python -m lensor.eval --contracts 50 --mode retrieval --retrieval-check
 ```
 
 ## Risk score

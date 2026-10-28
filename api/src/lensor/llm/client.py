@@ -15,7 +15,10 @@ from lensor.config import Settings
 T = TypeVar("T", bound=BaseModel)
 
 # OpenRouter routing: only providers that support every parameter and do not keep the data.
-CHAT_PROVIDER = {"require_parameters": True, "data_collection": "deny"}
+# Of those, use the cheapest provider. Some providers charge 2 to 4 times the list price.
+CHAT_PROVIDER = {"require_parameters": True, "data_collection": "deny", "sort": "price"}
+# Hidden reasoning can be 10 times longer than the answer. Settings can turn it off.
+NO_REASONING = {"enabled": False}
 EMBED_PROVIDER = {"data_collection": "deny"}
 
 
@@ -118,6 +121,12 @@ class OpenRouterClient:
             http_client=http_client,
         )
 
+    def _json_body(self) -> dict[str, Any]:
+        body: dict[str, Any] = {"provider": CHAT_PROVIDER, "usage": {"include": True}}
+        if not self._settings.llm_extract_reasoning:
+            body["reasoning"] = NO_REASONING
+        return body
+
     async def complete_json(
         self, model: str, messages: list[dict], schema: type[T]
     ) -> tuple[T, Usage]:
@@ -133,7 +142,7 @@ class OpenRouterClient:
                         "schema": strict_schema(schema),
                     },
                 },
-                extra_body={"provider": CHAT_PROVIDER, "usage": {"include": True}},
+                extra_body=self._json_body(),
             )
         except openai.OpenAIError as exc:
             raise LLMError(_error_message(exc)) from exc
